@@ -1,0 +1,153 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.24.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "901f1491d4b363a32f373abe753763a0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"assigment-1-template\">Assigment 1 Template</h1></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "81b1fdd3ec5f9503b0f50d5af93e84c8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "\n\u001b[93m============================================================\u001b[0m\n\n  Welcome to \u001b[96mPM4Py\u001b[0m \u2014 Community Version\n  Open-Source License (AGPL v3)\n\n  \ud83d\udcda Docs & Examples:\n     https://processintelligence.solutions/pm4py\n\n  \u2696\ufe0f  \u001b[93mLicense: AGPL v3 \u2014 Commercial use requires open-sourcing your application.\u001b[0m\n     Business use without open-sourcing? A commercial license is available:\n     https://processintelligence.solutions/pm4py#licensing\n\n\u001b[93m============================================================\u001b[0m\n\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "vblA",
+      "code_hash": "f21b5792482d23744fb3639edd5cfb97",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='vblA-0' random-id='20971c24-9805-fba8-573b-9143a39ab4e8'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;vehicleClass&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;amount&#92;&quot;:35.0,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Create Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:&#92;&quot;561&#92;&quot;,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2006-07-23 22:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:157.0,&#92;&quot;totalPaymentAmount&#92;&quot;:0.0,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:0.0,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A1&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:&#92;&quot;NIL&#92;&quot;,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Send Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:11.0,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2006-12-04 23:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A1&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;amount&#92;&quot;:35.0,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Create Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:&#92;&quot;561&#92;&quot;,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2006-08-01 22:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:157.0,&#92;&quot;totalPaymentAmount&#92;&quot;:0.0,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:0.0,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A100&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:&#92;&quot;NIL&#92;&quot;,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Send Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:11.0,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2006-12-11 23:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A100&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:&#92;&quot;P&#92;&quot;,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Insert Fine Notification&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2007-01-14 23:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A100&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:&#92;&quot;P&#92;&quot;,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:71.5,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Add penalty&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2007-03-15 23:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A100&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Send for Credit Collection&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2009-03-29 22:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A100&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;amount&#92;&quot;:36.0,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Create Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:&#92;&quot;561&#92;&quot;,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2007-03-08 23:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:157.0,&#92;&quot;totalPaymentAmount&#92;&quot;:0.0,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:0.0,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A10000&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:&#92;&quot;NIL&#92;&quot;,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:null,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Send Fine&#92;&quot;,&#92;&quot;expense&#92;&quot;:13.0,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2007-07-16 22:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A10000&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:null,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;},{&#92;&quot;vehicleClass&#92;&quot;:null,&#92;&quot;amount&#92;&quot;:NaN,&#92;&quot;lastSent&#92;&quot;:&#92;&quot;P&#92;&quot;,&#92;&quot;concept:name&#92;&quot;:&#92;&quot;Insert Fine Notification&#92;&quot;,&#92;&quot;expense&#92;&quot;:NaN,&#92;&quot;org:resource&#92;&quot;:null,&#92;&quot;time:timestamp&#92;&quot;:&#92;&quot;2007-08-01 22:00:00+00:00&#92;&quot;,&#92;&quot;article&#92;&quot;:NaN,&#92;&quot;totalPaymentAmount&#92;&quot;:NaN,&#92;&quot;paymentAmount&#92;&quot;:NaN,&#92;&quot;points&#92;&quot;:NaN,&#92;&quot;case:concept:name&#92;&quot;:&#92;&quot;A10000&#92;&quot;,&#92;&quot;matricola&#92;&quot;:NaN,&#92;&quot;notificationType&#92;&quot;:&#92;&quot;P&#92;&quot;,&#92;&quot;dismissal&#92;&quot;:null,&#92;&quot;lifecycle:transition&#92;&quot;:&#92;&quot;complete&#92;&quot;}]&quot;' data-total-rows='561470' data-total-columns='16' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;vehicleClass&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;amount&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;lastSent&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;concept:name&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;expense&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;org:resource&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;time:timestamp&quot;,[&quot;datetime&quot;,&quot;datetime64[us, UTC]&quot;]],[&quot;article&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;totalPaymentAmount&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;paymentAmount&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;points&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;case:concept:name&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;matricola&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;notificationType&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;dismissal&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;lifecycle:transition&quot;,[&quot;string&quot;,&quot;object&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "561470 events read.\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "280aacc03bec53e37fc8683bf8c6914e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Time interval:</strong></span>\n<ul>\n<li>Start: <code>1999-12-31 23:00:00+00:00</code></li>\n<li>End:   <code>2013-06-17 22:00:00+00:00</code></li>\n<li>Duration: <code>4916 days 23:00:00</code></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "207eb0e527ffc4a923f7da2eb3b777dd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Distinct vehicleClass values:</strong> 4</span>\n<span class=\"paragraph\">A, C, M, R</span>\n<span class=\"paragraph\"><em>(+ 411,100 events with no vehicleClass recorded)</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "b9fc879c625fae8161af88f13783a9f0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Amount stats for initial 'Create Fine' event per case:</strong></span>\n<ul>\n<li>Min:    <code>0.0</code></li>\n<li>Median: <code>35.0</code></li>\n<li>Max:    <code>4351.0</code></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "3bd20797f97b581920f6aedeca5e4ce8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Events with points &gt; 0:</strong> 3,548<br />\n<strong>Cases affected:</strong> 3,548</span></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Activities associated with points &gt; 0:</strong></span></span><marimo-ui-element object-id='Xref-0' random-id='ca7425ab-5ea0-a9b9-339d-98bdde7bdb3a'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;_marimo_row_id&#92;&quot;:0,&#92;&quot;activity&#92;&quot;:&#92;&quot;Create Fine&#92;&quot;,&#92;&quot;event_count&#92;&quot;:3548}]&quot;' data-total-rows='1' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;activity&quot;,[&quot;string&quot;,&quot;object&quot;]],[&quot;event_count&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-selection='&quot;multi&quot;' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='true' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "01c0b449c6c2be7f7c6d187c57ed2a4d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"session-1\">Session 1</h1>\n<h2 id=\"task-11\">Task 1.1</h2>\n<span class=\"paragraph\">a) The log covers the time interval from 1999-12-31 23:00:00 UTC to 2013-06-17 22:00:00 UTC.</span>\n<span class=\"paragraph\">b) The attribute vehicleClass has 4 distinct values: A, C, M, and R. Note that some\n   events have no value recorded for this attribute.</span>\n<span class=\"paragraph\">c) For Create Fine events, the amount attribute has the following statistics:</span>\n<div class=\"language-text highlight\"><pre><span></span><code>- Min: 0.0\n\n- Median: 35.0\n\n- Max: 4351.0\n</code></pre></div>\n<span class=\"paragraph\">The distribution is heavily right-skewed, with the maximum value (4351) being more\n  than 100 times the median (35). This suggests the presence of extreme outliers. It\n  would be worth investigating which cases incur unusually high fines \u2014 for example,\n  whether specific vehicle classes, violation types, or time periods are associated\n  with these high amounts, and whether the zero-amount fines are data quality issues\n  or represent a specific case type.</span>\n<span class=\"paragraph\">d) There are 3,548 events with a points value greater than 0. All of them are\n  associated with the activity \"Create Fine\". The number of affected cases is 3,548,\n  meaning each affected case has exactly one such event \u2014 every case with points &gt; 0\n  received them at the moment the fine was created.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f22bfec305c5bb4bb0042db1eb78e759",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"session-2\">Session 2</h1>\n<h2 id=\"task-21\">Task 2.1</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "d58c2942676babbd2135b31a2bb7b428",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"task-22\">Task 2.2</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
