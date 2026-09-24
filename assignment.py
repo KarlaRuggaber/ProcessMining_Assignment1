@@ -322,5 +322,186 @@ def _(df, mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Task 2.2
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(df, mo):
+    # Task 2.2.4: event enrichment: cumulative sum of payment amounts per case
+    # Use a stable sort so that events tied on the same calendar day (the log
+    # only has day-level granularity, cf. Task 2.1.1) keep their original,
+    # correct relative order instead of being reshuffled by an unstable sort.
+    df_task4 = df.sort_values(['case:concept:name', 'time:timestamp'], kind='stable').copy()
+
+    # cumsum() and ffill() must each be grouped by case individually: chaining
+    # them in one groupby call would let ffill() leak values across case
+    # boundaries and carry the last payment total of one case into the next.
+    df_task4['payment_cumsum'] = df_task4.groupby('case:concept:name')['paymentAmount'].cumsum()
+    df_task4['payment_cumsum'] = df_task4.groupby('case:concept:name')['payment_cumsum'].ffill()
+    df_task4['payment_cumsum'] = df_task4['payment_cumsum'].fillna(0)
+
+    mo.md("""
+    **Enrichment `payment_cumsum`:** for each event, the cumulative sum of
+    `paymentAmount` over all prior (and the current) events of the same case:
+    `cumsum()` computes the running total at `Payment` events, `ffill()`
+    carries that total forward to events that are not themselves a payment,
+    and `fillna(0)` initializes the sum at 0 before any payment has occurred
+    — following the sequential-aggregation pattern for `col::sum` from the
+    lecture.
+    """)
+    return (df_task4,)
+
+
+@app.cell(hide_code=True)
+def _(df_task4, mo):
+    # Task 2.2.4a: verify the enrichment on a selected case (two payments)
+    _case_id = 'A10009'
+    _cols = ['time:timestamp', 'concept:name', 'paymentAmount', 'payment_cumsum', 'totalPaymentAmount']
+    _case_events = df_task4.loc[df_task4['case:concept:name'] == _case_id, _cols].reset_index(drop=True)
+    _payments = _case_events.loc[_case_events['concept:name'] == 'Payment', 'paymentAmount'].tolist()
+
+    mo.vstack([
+        mo.md(f"**Case `{_case_id}`** — verifying `payment_cumsum`:"),
+        mo.ui.table(_case_events),
+        mo.md(f"""
+    This case has two `Payment` events, of {_payments[0]:.0f} and {_payments[1]:.0f}.
+    Before either payment, `payment_cumsum` is 0. After the first payment it
+    is {_payments[0]:.0f}, and after the second it is {sum(_payments):.0f} —
+    matching `totalPaymentAmount` at every step. The enrichment behaves as
+    intended.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(df_task4, mo):
+    # Task 2.2.4b: compare payment_cumsum against the pre-existing totalPaymentAmount
+    _comparable = df_task4[df_task4['totalPaymentAmount'].notna()].copy()
+    _comparable['deviation'] = _comparable['payment_cumsum'] - _comparable['totalPaymentAmount']
+    _mismatch = _comparable[_comparable['deviation'].abs() > 0.01]
+
+    _dev_case_id = _mismatch.loc[_mismatch['concept:name'] == 'Payment', 'case:concept:name'].iloc[0]
+    _dev_cols = ['time:timestamp', 'concept:name', 'paymentAmount', 'payment_cumsum', 'totalPaymentAmount']
+    _dev_case = df_task4.loc[df_task4['case:concept:name'] == _dev_case_id, _dev_cols].reset_index(drop=True)
+
+    mo.vstack([
+        mo.md(f"""
+    Comparing `payment_cumsum` to `totalPaymentAmount` at the
+    {len(_comparable):,} events where `totalPaymentAmount` is defined
+    (`Create Fine` and `Payment`): they match in
+    {(1 - len(_mismatch) / len(_comparable)):.3%} of cases, with
+    {len(_mismatch)} deviating events ({len(_mismatch) / len(_comparable):.3%}),
+    all of them at a `Payment` event, and all with `payment_cumsum` *smaller*
+    than `totalPaymentAmount` (by {_mismatch['deviation'].abs().mean():.1f} on
+    average, up to {_mismatch['deviation'].abs().max():.1f}).
+    """),
+        mo.md(f"**Deviating case `{_dev_case_id}`:**"),
+        mo.ui.table(_dev_case),
+        mo.md("""
+    All deviations happen for cases with **two `Payment` events recorded on
+    the same calendar day** (the log's timestamp granularity cannot tell them
+    apart). `totalPaymentAmount` already shows the *final* total (after both
+    same-day payments) on the *first* of the two rows, whereas `payment_cumsum`
+    correctly shows only the running total after that individual payment. This
+    looks like a data-quality artifact of `totalPaymentAmount`: it was
+    apparently computed with knowledge of the case's ultimate total rather
+    than strictly as a running sum up to each event — precisely the kind of
+    issue the lecture warns about when trusting a pre-existing attribute
+    without verifying it against an independently computed enrichment.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(df_task4, mo):
+    # Task 2.2.5: event enrichment: outstanding_amount = amount owed so far - amount paid so far
+    df_task5 = df_task4.copy()
+
+    # amount owed = current fine amount (base amount, replaced by the higher
+    # penalized amount once "Add penalty" occurs) plus any expenses recorded
+    df_task5['amount_due_so_far'] = df_task5.groupby('case:concept:name')['amount'].ffill()
+
+    df_task5['expense_so_far'] = df_task5.groupby('case:concept:name')['expense'].cumsum()
+    df_task5['expense_so_far'] = df_task5.groupby('case:concept:name')['expense_so_far'].ffill()
+    df_task5['expense_so_far'] = df_task5['expense_so_far'].fillna(0)
+
+    df_task5['outstanding_amount'] = (
+        df_task5['amount_due_so_far'] + df_task5['expense_so_far'] - df_task5['payment_cumsum']
+    )
+
+    mo.md("""
+    **Enrichment `outstanding_amount`:** for each event, the amount the
+    offender still owes so far, built from three preliminary event
+    enrichments:
+    - `amount_due_so_far` = the latest known `amount` in the case so far
+      (`ffill()` of `amount`, which already holds the base fine or, once a
+      penalty is added, the higher penalized amount).
+    - `expense_so_far` = cumulative sum of `expense` in the case so far
+      (`cumsum()` + `ffill()` + `fillna(0)`, same pattern as `payment_cumsum`).
+    - `payment_cumsum` = cumulative sum of payments so far, from Task 4.
+
+    `outstanding_amount = amount_due_so_far + expense_so_far - payment_cumsum`.
+    """)
+    return (df_task5,)
+
+
+@app.cell(hide_code=True)
+def _(df_task5, mo):
+    # Task 2.2.5a: verify the enrichment on a selected case
+    _case_id = 'A10009'
+    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount']
+    _case_events = df_task5.loc[df_task5['case:concept:name'] == _case_id, _cols].reset_index(drop=True)
+
+    mo.vstack([
+        mo.md(f"**Case `{_case_id}`** — verifying `outstanding_amount`:"),
+        mo.ui.table(_case_events),
+        mo.md("""
+    `outstanding_amount` starts at the base fine amount, increases once the
+    sending `expense` and then the penalty are added, decreases with the
+    first (partial) payment, and reaches exactly 0 once the second payment
+    fully covers the penalized amount plus expenses — behaving as intended.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(df_task5, mo):
+    # Task 2.2.5b: number of events with outstanding_amount > 0
+    _n_positive = int((df_task5['outstanding_amount'] > 0).sum())
+    _n_negative = int((df_task5['outstanding_amount'] < 0).sum())
+    _n_zero = int((df_task5['outstanding_amount'] == 0).sum())
+    _n_total = len(df_task5)
+
+    _zero_df = df_task5[df_task5['outstanding_amount'] == 0]
+    _n_zero_payment = int((_zero_df['concept:name'] == 'Payment').sum())
+    _n_zero_create_fine = int((_zero_df['concept:name'] == 'Create Fine').sum())
+
+    mo.md(f"""
+    **Events with `outstanding_amount` > 0:** {_n_positive:,} out of
+    {_n_total:,} ({_n_positive / _n_total:.1%}).
+
+    The remaining {_n_total - _n_positive:,} events split into two groups,
+    not just "the rest":
+    - **Exactly 0:** {_n_zero:,} events ({_n_zero / _n_total:.1%}). Mostly
+      ({_n_zero_payment:,}) `Payment` events where that payment fully settles
+      the case, plus {_n_zero_create_fine:,} `Create Fine` events where the
+      fine amount itself is 0 (the zero-amount fines already seen in Task
+      1.1c), and a few later events of already-settled cases.
+    - **Negative:** {_n_negative:,} events ({_n_negative / _n_total:.1%}),
+      i.e. the case appears overpaid at that point — likely a mix of genuine
+      overpayments and the same kind of same-day payment-ordering artifacts
+      identified in Task 4b.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()
