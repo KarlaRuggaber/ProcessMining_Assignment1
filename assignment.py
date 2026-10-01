@@ -688,5 +688,325 @@ def _(case_log, mo, pd, px):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Session 3
+
+    ## Task 3.1
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Task 3.1, defining three business-level process outcomes:**
+
+    Looking at the activities in the log, there are three natural, business-relevant
+    ways a traffic fine case can resolve, and they aren't mutually exclusive, so
+    this is a good candidate for outcome overlap analysis:
+
+    1. **Paid**: the offender settled the debt, meaning the running
+       `outstanding_amount` (built in Task 2.2.5) reaches 0 or less at some
+       point in the case.
+    2. **Sent to credit collection**: the case was escalated to debt
+       collection enforcement, i.e. the case contains a
+       `Send for Credit Collection` event.
+    3. **Appealed**: the offender formally contested the fine, i.e. the case
+       contains at least one of the appeal-related activities
+       (`Insert Date Appeal to Prefecture`, `Send Appeal to Prefecture`,
+       `Receive Result Appeal from Prefecture`,
+       `Notify Result Appeal to Offender`, `Appeal to Judge`).
+
+    These can genuinely co-occur (a case can be paid and still appealed, or
+    sent to collection and later appealed), and plenty of cases in the log
+    are still open and hit none of them, so it's worth checking the overlaps
+    and the "no outcome" bucket rather than assuming the three partition the
+    cases cleanly.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(case_log, df_task5, mo, pd):
+    # Task 3.1a: enrich the case log with the three outcome indicators and
+    # count cases per outcome, per pairwise combination, and with no outcome
+    _appeal_activities = {
+        'Insert Date Appeal to Prefecture', 'Send Appeal to Prefecture',
+        'Receive Result Appeal from Prefecture', 'Notify Result Appeal to Offender',
+        'Appeal to Judge',
+    }
+
+    case_log_outcomes = case_log.copy()
+    case_log_outcomes['outcome_paid'] = df_task5.groupby('case:concept:name')['outstanding_amount'].apply(lambda s: (s <= 0).any())
+    case_log_outcomes['outcome_credit_collection'] = df_task5.groupby('case:concept:name')['concept:name'].apply(lambda s: 'Send for Credit Collection' in set(s))
+    case_log_outcomes['outcome_appealed'] = df_task5.groupby('case:concept:name')['concept:name'].apply(lambda s: len(set(s) & _appeal_activities) > 0)
+
+    _outcomes = ['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']
+    _n_total = len(case_log_outcomes)
+
+    _single_counts = pd.DataFrame([
+        {'outcome': o, 'no_of_cases': int(case_log_outcomes[o].sum()), 'share': case_log_outcomes[o].mean()}
+        for o in _outcomes
+    ])
+
+    _pair_counts = pd.DataFrame([
+        {
+            'outcome_pair': f'{a} & {b}',
+            'no_of_cases': int((case_log_outcomes[a] & case_log_outcomes[b]).sum()),
+        }
+        for i, a in enumerate(_outcomes) for b in _outcomes[i + 1:]
+    ])
+
+    _n_none = int((~case_log_outcomes[_outcomes[0]] & ~case_log_outcomes[_outcomes[1]] & ~case_log_outcomes[_outcomes[2]]).sum())
+
+    mo.vstack([
+        mo.md("**Cases per outcome:**"),
+        mo.ui.table(_single_counts),
+        mo.md("**Cases per pairwise outcome combination:**"),
+        mo.ui.table(_pair_counts),
+        mo.md(f"""
+    **Cases with none of the three outcomes:** {_n_none:,} out of {_n_total:,}
+    ({_n_none / _n_total:.1%}). These are cases that, as far as the log
+    shows, are still stuck somewhere in the middle of the process: the fine
+    was created and maybe sent, but it was never paid off, never escalated
+    to collection, and never appealed before the log's observation window
+    ends.
+    """),
+    ])
+    return (case_log_outcomes,)
+
+
+@app.cell(hide_code=True)
+def _(case_log_outcomes, df_task5, mo):
+    # Task 3.1b: inspect and interpret a case for each of the three outcomes
+    _outcome_cols = ['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']
+    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount']
+
+    def _case_table(case_id):
+        _table = df_task5.loc[df_task5['case:concept:name'] == case_id, _cols].reset_index(drop=True)
+        # the outcome indicators are case-level (one value per case), repeated
+        # on every row here so they're visible right next to the events
+        for _col in _outcome_cols:
+            _table[_col] = case_log_outcomes.loc[case_id, _col]
+        return _table
+
+    mo.vstack([
+        mo.md("**Paid: case `A10000`**"),
+        mo.ui.table(_case_table('A10000')),
+        mo.md("""
+    This is the same case walked through in Task 2.1.3: a penalty gets
+    added (36 to 74), and the single payment of 87 then covers it in full,
+    `outstanding_amount` lands exactly on 0. A clean, single-payment
+    resolution, which is what `outcome_paid` is meant to capture.
+    """),
+        mo.md("**Sent to credit collection: case `A100`**"),
+        mo.ui.table(_case_table('A100')),
+        mo.md("""
+    Here the fine is created, sent, and a penalty gets added once the
+    notification deadline passes, but no payment ever comes in. More than
+    two years later (2009-03-29), the case gets escalated to
+    `Send for Credit Collection`. `outstanding_amount` just keeps climbing
+    and never gets paid down, the offender simply never settled the debt.
+    """),
+        mo.md("**Appealed: case `A10001`**"),
+        mo.ui.table(_case_table('A10001')),
+        mo.md("""
+    This offender contests the fine: right after the notification arrives,
+    `Insert Date Appeal to Prefecture` happens, then `Send Appeal to
+    Prefecture` follows a bit later (the penalty still gets added in
+    between, since the appeal doesn't automatically freeze the fine
+    amount). `outcome_appealed` picks this up through the appeal-related
+    activities, regardless of how the appeal turns out.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(case_log_outcomes, df_task5, mo):
+    # Task 3.1c: inspect and interpret a case with more than one outcome
+    _multi_cases = case_log_outcomes[
+        case_log_outcomes[['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']].sum(axis=1) > 1
+    ]
+    _n_multi = len(_multi_cases)
+
+    _outcome_cols = ['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']
+    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount']
+    _case_id = 'A10125'
+    _case_table = df_task5.loc[df_task5['case:concept:name'] == _case_id, _cols].reset_index(drop=True)
+    for _col in _outcome_cols:
+        _case_table[_col] = case_log_outcomes.loc[_case_id, _col]
+
+    mo.vstack([
+        mo.md(f"""
+    {_n_multi:,} cases have more than one outcome at once. Here's one of
+    them, case `{_case_id}` (paid *and* appealed):
+    """),
+        mo.ui.table(_case_table),
+        mo.md("""
+    This case shows why "paid" and "appealed" aren't mutually exclusive: the
+    offender appeals the fine, then pays off exactly what was owed at that
+    point (36 + 13 expense = 49), bringing `outstanding_amount` to 0. But
+    the penalty still gets applied afterward anyway (the appeal evidently
+    didn't stop it in time), pushing the amount owed back up to 38, on the
+    very same day the appeal is actually sent off. So the case counts as
+    both paid (it did reach 0 at some point) and appealed, even though it
+    isn't fully resolved by the end of what we see in the log. A good
+    reminder that "paid" here means "settled at some point", not
+    necessarily "the final state of the case".
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(case_log_outcomes, df_task5, mo):
+    # Task 3.1d: inspect and interpret a case with none of the three outcomes
+    _none_cases = case_log_outcomes[
+        ~case_log_outcomes['outcome_paid'] & ~case_log_outcomes['outcome_credit_collection'] & ~case_log_outcomes['outcome_appealed']
+    ]
+    _n_none = len(_none_cases)
+
+    _outcome_cols = ['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']
+    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount']
+    _case_id = 'A1'
+    _case_table = df_task5.loc[df_task5['case:concept:name'] == _case_id, _cols].reset_index(drop=True)
+    for _col in _outcome_cols:
+        _case_table[_col] = case_log_outcomes.loc[_case_id, _col]
+
+    mo.vstack([
+        mo.md(f"""
+    {_n_none:,} cases have none of the three outcomes. Here's one of them,
+    case `{_case_id}`:
+    """),
+        mo.ui.table(_case_table),
+        mo.md("""
+    This case only has two events: the fine gets created, then it gets
+    sent to the offender, and that's it, nothing else is recorded. No
+    payment, no penalty even, no escalation to collection, no appeal. It
+    simply doesn't show any further activity before the log's observation
+    window ends on 2013-06-17, so we can't tell from the data alone whether
+    it was quietly paid off through some other channel, forgotten, or just
+    cut off by the end of the recording period. Either way, it's a case
+    that the log leaves genuinely unresolved.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Session 4
+
+    ## Task 4.1
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(df, mo, pd):
+    # Task 4.1.1: distribution of sequential variants
+    _variant_series = df.sort_values(['case:concept:name', 'time:timestamp'], kind='stable') \
+                         .groupby('case:concept:name')['concept:name'].apply(tuple)
+    variant_counts = _variant_series.value_counts()
+
+    _n_cases = len(_variant_series)
+    _n_variants = len(variant_counts)
+
+    _top_df = pd.DataFrame([
+        {'variant': ' -> '.join(v), 'no_of_cases': int(c), 'share': c / _n_cases}
+        for v, c in variant_counts.head(10).items()
+    ])
+
+    mo.vstack([
+        mo.md(f"""
+    A **sequential variant** is the equivalence class of all cases that
+    share the exact same sequence of activities. Across all {_n_cases:,}
+    cases, there are **{_n_variants} distinct variants**. Here are the 10
+    most frequent ones:
+    """),
+        mo.ui.table(_top_df),
+    ])
+    return (variant_counts,)
+
+
+@app.cell(hide_code=True)
+def _(mo, variant_counts):
+    # Task 4.1.1a: minimum number of variants needed to cover 80% of the cases
+    _n_cases = int(variant_counts.sum())
+    _cum_share = variant_counts.cumsum() / _n_cases
+    _n_needed = int((_cum_share < 0.8).sum()) + 1
+    _actual_share = _cum_share.iloc[_n_needed - 1]
+
+    mo.md(f"""
+    Just **{_n_needed} variants** are needed to cover 80% of the cases: the
+    top {_n_needed} variants together already account for
+    {_actual_share:.1%} of all {_n_cases:,} cases. That's a steep head,
+    consistent with the heavily skewed, tariff-driven nature of this
+    process that we've already seen for other attributes (Task 2.3.5b,
+    2.3.7): most cases funnel through just a handful of standard paths.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo, variant_counts):
+    # Task 4.1.1b: summarize each of the top 4 sequential variants in one sentence
+    _n_cases = int(variant_counts.sum())
+    _top4 = variant_counts.head(4)
+    _rows = [f"- `{' -> '.join(v)}` ({c:,} cases, {c / _n_cases:.1%})" for v, c in _top4.items()]
+
+    mo.md(f"""
+    **The top 4 variants:**
+
+    {chr(10).join(_rows)}
+
+    In one sentence each:
+    1. `{' -> '.join(_top4.index[0])}`: the fine is created, sent, formally
+       notified, hit with a late-payment penalty, and finally escalated to
+       credit collection without ever being paid.
+    2. `{' -> '.join(_top4.index[1])}`: the fine is created and paid
+       immediately, without any of the sending or notification steps ever
+       happening.
+    3. `{' -> '.join(_top4.index[2])}`: the fine is created and sent, and
+       nothing else happens before the log's observation window ends.
+    4. `{' -> '.join(_top4.index[3])}`: the fine goes through the full
+       notify-and-penalize cycle, but this time it does get paid off
+       afterward, so no escalation is needed.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(df, mo):
+    # Task 4.1.1c: filter to the fine object sub-log, compare variant counts
+    fine_activities = [
+        'Create Fine', 'Send Fine', 'Insert Fine Notification', 'Add penalty',
+        'Send for Credit Collection', 'Payment',
+    ]
+    _df_sorted = df.sort_values(['case:concept:name', 'time:timestamp'], kind='stable')
+    df_fine = _df_sorted[_df_sorted['concept:name'].isin(fine_activities)].copy()
+
+    _full_variants = _df_sorted.groupby('case:concept:name')['concept:name'].apply(tuple)
+    _fine_variants = df_fine.groupby('case:concept:name')['concept:name'].apply(tuple)
+
+    mo.md(f"""
+    Filtering the event log down to just the fine object's 6 activities
+    (`{fine_activities}`) keeps all {len(_fine_variants):,} cases (every
+    case starts with `Create Fine`, cf. Task 2.2.4), but the number of
+    distinct sequential variants drops from **{_full_variants.nunique()} to
+    {_fine_variants.nunique()}**. Removing the 5 appeal-related activities
+    collapses a lot of near-duplicate variants into the same shorter
+    sequence: those extra activities were responsible for most of the
+    variant diversity in the full log, even though they only occur in a
+    small minority of cases (cf. `outcome_appealed`, 3.0% of cases, in
+    Task 3.1a).
+    """)
+    return (df_fine, fine_activities)
+
+
 if __name__ == "__main__":
     app.run()
