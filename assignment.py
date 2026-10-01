@@ -1008,5 +1008,115 @@ def _(df, mo):
     return (df_fine, fine_activities)
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    # Task 4.1.2: process map (absolute frequency) for the fine object sub-log, inspected in Disco
+    mo.vstack([
+        mo.md("**Process map (absolute frequency) for the fine object sub-log, from Disco:**"),
+        mo.image(src="screenshot 4.1.2.a.png"),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Task 4.1.2a, three observations that are unexpected and worth investigating further:**
+
+    1. **`Payment` is directly followed by `Add penalty` 3,902 times.** A
+       penalty for not paying gets applied even though a payment was
+       already recorded right before it. That's backwards from what you'd
+       expect, a payment should prevent or cancel a pending penalty, not
+       be followed by one. Worth checking whether the penalty logic simply
+       doesn't check for existing payments before firing, or whether the
+       payment just didn't cover the full amount and a partial payment
+       still triggers the penalty.
+    2. **`Payment` is directly followed by another `Payment` 4,310 times**
+       (the self-loop on `Payment`). The same case gets multiple separate
+       payment postings one after another. Worth investigating whether
+       this reflects a genuine installment arrangement, or duplicate or
+       erroneous payment entries, since a single fine normally shouldn't
+       need more than one payment record if it's paid in full the first
+       time.
+    3. **`Add penalty` is directly followed by the end of the case 3,252
+       times** (the dashed edge straight from `Add penalty` to the end
+       marker). These cases get penalized and then just stop: no `Payment`
+       and no `Send for Credit Collection` ever follows within this
+       sub-log. That's neither a resolution nor an escalation, so it's
+       worth checking whether these cases are genuinely still open at the
+       end of the log's observation window, or whether they continue
+       through an appeal-related activity that this filtered sub-log hides.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.vstack([
+        mo.md(r"""
+    **Task 4.1.2b, a sequential variant exhibiting unexpected behavior:**
+
+    Using Disco's Follower filter (`Payment` directly followed by `Payment`)
+    on the fine object sub-log isolates the 4,018 cases behind the
+    `Payment → Payment` self-loop from the process map. Within that filtered
+    set, the dominant variant (3,793 of those cases, 94.4%) is:
+
+    ```
+    Create Fine -> Send Fine -> Insert Fine Notification -> Add penalty -> Payment -> Payment
+    ```
+
+    i.e. the fine goes through the full notify-and-penalize path, and only
+    once the penalty has been applied do two separate `Payment` events
+    follow one right after another. Case `A10009`, below, is an example of
+    this variant:
+    """),
+        mo.image(src="Screenshot 2026-10-01 at 14.18.22.png"),
+        mo.image(src="Screenshot 2026-10-01 at 14.18.33.png"),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(df, mo):
+    # Task 4.1.2c: inspect case A10009 (the example of the variant from 4.1.2b) and explain the unexpected behavior
+    _cols = ['time:timestamp', 'concept:name', 'amount', 'expense', 'paymentAmount', 'totalPaymentAmount']
+    _case = df.loc[df['case:concept:name'] == 'A10009', _cols].sort_values('time:timestamp').reset_index(drop=True)
+
+    _base_amount = 22.0
+    _penalized_amount = 44.0
+    _expense = 13.0
+    _payment_1 = 35.0
+    _payment_2 = 22.0
+
+    mo.vstack([
+        mo.md("**Case `A10009`:**"),
+        mo.ui.table(_case),
+        mo.md(f"""
+    **Explanation for the `Payment -> Payment` behavior:**
+
+    The numbers line up too precisely to be a coincidence:
+    - `{_base_amount:.0f}` (base fine) `+ {_expense:.0f}` (sending `expense`)
+      `= {_base_amount + _expense:.0f}`, exactly the first `paymentAmount`
+      ({_payment_1:.0f}).
+    - `{_penalized_amount:.0f}` (penalized `amount`) `- {_base_amount:.0f}`
+      (base fine) `= {_penalized_amount - _base_amount:.0f}`, exactly the
+      second `paymentAmount` ({_payment_2:.0f}).
+
+    So the first payment covers exactly what the offender was originally
+    told they owed (the base fine plus the sending expense), from before
+    any penalty existed. The `Add penalty` event happens on 2007-09-20,
+    but the first payment only arrives on 2007-09-30, after the penalty
+    was already applied in the system, so the offender was effectively
+    paying off an amount that was already outdated. The second payment,
+    a month later, covers exactly the extra amount added by the penalty.
+    This looks less like a data quality issue (e.g. a duplicate or
+    erroneous payment posting) and more like the offender paying what the
+    original notice said, then having to make a second, separate payment
+    once they were informed of (or realized) the late-payment surcharge.
+    """),
+    ])
+    return
+
+
 if __name__ == "__main__":
     app.run()
