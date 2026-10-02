@@ -1005,7 +1005,7 @@ def _(df, mo):
     small minority of cases (cf. `outcome_appealed`, 3.0% of cases, in
     Task 3.1a).
     """)
-    return (df_fine, fine_activities)
+    return
 
 
 @app.cell(hide_code=True)
@@ -1113,6 +1113,57 @@ def _(df, mo):
     erroneous payment posting) and more like the offender paying what the
     original notice said, then having to make a second, separate payment
     once they were informed of (or realized) the late-payment surcharge.
+    """),
+    ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Task 4.2
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    # Task 4.2.3: BPMN workflow graph of how the fine object *should* behave (bpmn/fine_object.bpmn, made with bpmn.io)
+    mo.vstack([
+        mo.md("**Task 4.2.3, BPMN workflow graph for the fine object (`bpmn/fine_object.bpmn`):**"),
+        mo.image(src="bpmn/fine_object.svg"),
+        mo.md(r"""
+    My current understanding of how a fine *should* move through the
+    process, using each of the 6 fine object activities exactly once:
+
+    - Every case starts with `Create Fine`. If the offender pays right away
+      (on the spot), the fine goes straight to `Payment`, which matches
+      variant 2 from Task 4.1.1b (`Create Fine -> Payment`).
+    - Otherwise the fine is mailed (`Send Fine`) and the offender is
+      formally notified (`Insert Fine Notification`). If they pay within
+      the deadline, the fine goes to `Payment` without any penalty.
+    - If they don't, `Add penalty` raises the amount (the late-payment
+      surcharge from Task 2.1.2b). The offender then either pays the
+      penalized amount or the fine is escalated via `Send for Credit
+      Collection`, which ends the fine object's lifecycle without a payment
+      (variant 1 from Task 4.1.1b).
+    - `Payment` can repeat as long as the fine isn't fully paid yet,
+      because partial payments and installments are legitimate. This is
+      exactly what we saw in case `A10009` in Task 4.1.2c.
+
+    The model is a proper workflow graph: one start event, one end event,
+    only XOR gateways, and every node lies on a path from start to end.
+    Because it uses only XOR gateways, there's never more than one token in
+    the net, so a lack of synchronization can't happen. And since there's
+    no AND-join, it can't deadlock either, so the model is **sound**. I also
+    double-checked this by converting the BPMN file into a Petri net with
+    pm4py and running its Woflan soundness check, which confirms it's sound.
+
+    Behavior from Task 4.1.2a that deliberately does *not* fit this model:
+    `Payment -> Add penalty` (a penalty after a payment), `Add penalty`
+    without any follow-up, and `Create Fine -> Send Fine` cases that just
+    stop. Those are exactly the deviations to examine with conformance
+    checking in Session 5.
     """),
     ])
     return

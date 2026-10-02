@@ -111,16 +111,9 @@
       "console": []
     },
     {
-      "id": "SFPL",
-      "code_hash": "01c0b449c6c2be7f7c6d187c57ed2a4d",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"session-1\">Session 1</h1>\n<h2 id=\"task-11\">Task 1.1</h2>\n<span class=\"paragraph\">a) The log covers the time interval from 1999-12-31 23:00:00 UTC to 2013-06-17 22:00:00 UTC.</span>\n<span class=\"paragraph\">b) The attribute vehicleClass has 4 distinct values: A, C, M, and R. Note that some\n   events have no value recorded for this attribute.</span>\n<span class=\"paragraph\">c) For Create Fine events, the amount attribute has the following statistics:</span>\n<div class=\"language-text highlight\"><pre><span></span><code>- Min: 0.0\n\n- Median: 35.0\n\n- Max: 4351.0\n</code></pre></div>\n<span class=\"paragraph\">The distribution is heavily right-skewed, with the maximum value (4351) being more\n  than 100 times the median (35). This suggests the presence of extreme outliers. It\n  would be worth investigating which cases incur unusually high fines \u2014 for example,\n  whether specific vehicle classes, violation types, or time periods are associated\n  with these high amounts, and whether the zero-amount fines are data quality issues\n  or represent a specific case type.</span>\n<span class=\"paragraph\">d) There are 3,548 events with a points value greater than 0. All of them are\n  associated with the activity \"Create Fine\". The number of affected cases is 3,548,\n  meaning each affected case has exactly one such event \u2014 every case with points &gt; 0\n  received them at the moment the fine was created.</span></span>"
-          }
-        }
-      ],
+      "id": "ZBYS",
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
@@ -137,6 +130,30 @@
       "console": []
     },
     {
+      "id": "aLJB",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
       "id": "RGSE",
       "code_hash": "d58c2942676babbd2135b31a2bb7b428",
       "outputs": [
@@ -147,6 +164,187 @@
           }
         }
       ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "01c0b449c6c2be7f7c6d187c57ed2a4d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"session-1\">Session 1</h1>\n<h2 id=\"task-11\">Task 1.1</h2>\n<span class=\"paragraph\">a) The log covers the time interval from 1999-12-31 23:00:00 UTC to 2013-06-17 22:00:00 UTC.</span>\n<span class=\"paragraph\">b) The attribute vehicleClass has 4 distinct values: A, C, M, and R. Note that some\n   events have no value recorded for this attribute.</span>\n<span class=\"paragraph\">c) For Create Fine events, the amount attribute has the following statistics:</span>\n<div class=\"language-text highlight\"><pre><span></span><code>- Min: 0.0\n\n- Median: 35.0\n\n- Max: 4351.0\n</code></pre></div>\n<span class=\"paragraph\">The distribution is heavily right-skewed, with the maximum value (4351) being more\n  than 100 times the median (35). This suggests the presence of extreme outliers. It\n  would be worth investigating which cases incur unusually high fines \u2014 for example,\n  whether specific vehicle classes, violation types, or time periods are associated\n  with these high amounts, and whether the zero-amount fines are data quality issues\n  or represent a specific case type.</span>\n<span class=\"paragraph\">d) There are 3,548 events with a points value greater than 0. All of them are\n  associated with the activity \"Create Fine\". The number of affected cases is 3,548,\n  meaning each affected case has exactly one such event \u2014 every case with points &gt; 0\n  received them at the moment the fine was created.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": null,
+      "outputs": [],
       "console": []
     }
   ]
