@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:celonis="http://www.celonis.com/schema/bpmn/celonis" id="discovered-model" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.28.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_1" name="Fine object" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent_-1" name="Offence detected">
+      <bpmn2:outgoing>Flow_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:endEvent id="EndEvent_-2" name="Fine closed">
+      <bpmn2:incoming>Flow_10</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:task id="Task_1" name="Create Fine">
+      <bpmn2:incoming>Flow_1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_2</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_16" name="Send Fine">
+      <bpmn2:incoming>Flow_Spot_No</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_3</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_28" name="Insert Fine Notification">
+      <bpmn2:incoming>Flow_3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_4</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_25" name="Add penalty">
+      <bpmn2:incoming>Flow_InTime_No</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_5</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_18" name="Payment">
+      <bpmn2:incoming>Flow_7</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_8</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_9" name="Send for Credit Collection">
+      <bpmn2:incoming>Flow_Penalty_No</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_CC_End</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:exclusiveGateway id="Gateway_PaidOnSpot" name="Paid on the spot?">
+      <bpmn2:incoming>Flow_2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Spot_No</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Spot_Yes</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_PaidInTime" name="Paid within deadline?">
+      <bpmn2:incoming>Flow_4</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_InTime_No</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_InTime_Yes</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_PaidAfterPenalty" name="Paid after penalty?">
+      <bpmn2:incoming>Flow_5</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Penalty_No</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Penalty_Yes</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_PayJoin">
+      <bpmn2:incoming>Flow_Spot_Yes</bpmn2:incoming>
+      <bpmn2:incoming>Flow_InTime_Yes</bpmn2:incoming>
+      <bpmn2:incoming>Flow_Penalty_Yes</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_6</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_InstallmentJoin">
+      <bpmn2:incoming>Flow_6</bpmn2:incoming>
+      <bpmn2:incoming>Flow_Installment</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_7</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_FullyPaid" name="Fully paid?">
+      <bpmn2:incoming>Flow_8</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Paid_Yes</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Installment</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:exclusiveGateway id="Gateway_EndJoin">
+      <bpmn2:incoming>Flow_CC_End</bpmn2:incoming>
+      <bpmn2:incoming>Flow_Paid_Yes</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_10</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:sequenceFlow id="Flow_1" sourceRef="StartEvent_-1" targetRef="Task_1" />
+    <bpmn2:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="Gateway_PaidOnSpot" />
+    <bpmn2:sequenceFlow id="Flow_Spot_No" name="no" sourceRef="Gateway_PaidOnSpot" targetRef="Task_16" />
+    <bpmn2:sequenceFlow id="Flow_Spot_Yes" name="yes" sourceRef="Gateway_PaidOnSpot" targetRef="Gateway_PayJoin" />
+    <bpmn2:sequenceFlow id="Flow_3" sourceRef="Task_16" targetRef="Task_28" />
+    <bpmn2:sequenceFlow id="Flow_4" sourceRef="Task_28" targetRef="Gateway_PaidInTime" />
+    <bpmn2:sequenceFlow id="Flow_InTime_No" name="no" sourceRef="Gateway_PaidInTime" targetRef="Task_25" />
+    <bpmn2:sequenceFlow id="Flow_InTime_Yes" name="yes" sourceRef="Gateway_PaidInTime" targetRef="Gateway_PayJoin" />
+    <bpmn2:sequenceFlow id="Flow_5" sourceRef="Task_25" targetRef="Gateway_PaidAfterPenalty" />
+    <bpmn2:sequenceFlow id="Flow_Penalty_No" name="no" sourceRef="Gateway_PaidAfterPenalty" targetRef="Task_9" />
+    <bpmn2:sequenceFlow id="Flow_Penalty_Yes" name="yes" sourceRef="Gateway_PaidAfterPenalty" targetRef="Gateway_PayJoin" />
+    <bpmn2:sequenceFlow id="Flow_6" sourceRef="Gateway_PayJoin" targetRef="Gateway_InstallmentJoin" />
+    <bpmn2:sequenceFlow id="Flow_7" sourceRef="Gateway_InstallmentJoin" targetRef="Task_18" />
+    <bpmn2:sequenceFlow id="Flow_8" sourceRef="Task_18" targetRef="Gateway_FullyPaid" />
+    <bpmn2:sequenceFlow id="Flow_Paid_Yes" name="yes" sourceRef="Gateway_FullyPaid" targetRef="Gateway_EndJoin" />
+    <bpmn2:sequenceFlow id="Flow_Installment" name="no (further installment)" sourceRef="Gateway_FullyPaid" targetRef="Gateway_InstallmentJoin" />
+    <bpmn2:sequenceFlow id="Flow_CC_End" sourceRef="Task_9" targetRef="Gateway_EndJoin" />
+    <bpmn2:sequenceFlow id="Flow_10" sourceRef="Gateway_EndJoin" targetRef="EndEvent_-2" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="StartEvent_-1_di" bpmnElement="StartEvent_-1">
+        <dc:Bounds x="152" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="128" y="225" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_-2_di" bpmnElement="EndEvent_-2">
+        <dc:Bounds x="1622" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1611" y="225" width="58" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">
+        <dc:Bounds x="240" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_16_di" bpmnElement="Task_16">
+        <dc:Bounds x="500" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_28_di" bpmnElement="Task_28">
+        <dc:Bounds x="660" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_25_di" bpmnElement="Task_25">
+        <dc:Bounds x="920" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_di" bpmnElement="Task_18">
+        <dc:Bounds x="1270" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_9_di" bpmnElement="Task_9">
+        <dc:Bounds x="1180" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PaidOnSpot_di" bpmnElement="Gateway_PaidOnSpot" isMarkerVisible="true">
+        <dc:Bounds x="395" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="376" y="145" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PaidInTime_di" bpmnElement="Gateway_PaidInTime" isMarkerVisible="true">
+        <dc:Bounds x="815" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="788" y="145" width="104" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PaidAfterPenalty_di" bpmnElement="Gateway_PaidAfterPenalty" isMarkerVisible="true">
+        <dc:Bounds x="1075" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1053" y="145" width="94" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PayJoin_di" bpmnElement="Gateway_PayJoin" isMarkerVisible="true">
+        <dc:Bounds x="1075" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_InstallmentJoin_di" bpmnElement="Gateway_InstallmentJoin" isMarkerVisible="true">
+        <dc:Bounds x="1175" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_FullyPaid_di" bpmnElement="Gateway_FullyPaid" isMarkerVisible="true">
+        <dc:Bounds x="1425" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1423" y="350" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_EndJoin_di" bpmnElement="Gateway_EndJoin" isMarkerVisible="true">
+        <dc:Bounds x="1525" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="188" y="200" />
+        <di:waypoint x="240" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="340" y="200" />
+        <di:waypoint x="395" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Spot_No_di" bpmnElement="Flow_Spot_No">
+        <di:waypoint x="445" y="200" />
+        <di:waypoint x="500" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="465" y="182" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Spot_Yes_di" bpmnElement="Flow_Spot_Yes">
+        <di:waypoint x="420" y="225" />
+        <di:waypoint x="420" y="500" />
+        <di:waypoint x="1100" y="500" />
+        <di:waypoint x="1100" y="425" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="426" y="240" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="600" y="200" />
+        <di:waypoint x="660" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="760" y="200" />
+        <di:waypoint x="815" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_InTime_No_di" bpmnElement="Flow_InTime_No">
+        <di:waypoint x="865" y="200" />
+        <di:waypoint x="920" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="885" y="182" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_InTime_Yes_di" bpmnElement="Flow_InTime_Yes">
+        <di:waypoint x="840" y="225" />
+        <di:waypoint x="840" y="400" />
+        <di:waypoint x="1075" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="846" y="240" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="1020" y="200" />
+        <di:waypoint x="1075" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Penalty_No_di" bpmnElement="Flow_Penalty_No">
+        <di:waypoint x="1125" y="200" />
+        <di:waypoint x="1180" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1145" y="182" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Penalty_Yes_di" bpmnElement="Flow_Penalty_Yes">
+        <di:waypoint x="1100" y="225" />
+        <di:waypoint x="1100" y="375" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1106" y="240" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1125" y="400" />
+        <di:waypoint x="1175" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1225" y="400" />
+        <di:waypoint x="1270" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1370" y="400" />
+        <di:waypoint x="1425" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Paid_Yes_di" bpmnElement="Flow_Paid_Yes">
+        <di:waypoint x="1475" y="400" />
+        <di:waypoint x="1550" y="400" />
+        <di:waypoint x="1550" y="225" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1491" y="382" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Installment_di" bpmnElement="Flow_Installment">
+        <di:waypoint x="1450" y="425" />
+        <di:waypoint x="1450" y="470" />
+        <di:waypoint x="1200" y="470" />
+        <di:waypoint x="1200" y="425" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1267" y="477" width="116" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CC_End_di" bpmnElement="Flow_CC_End">
+        <di:waypoint x="1280" y="200" />
+        <di:waypoint x="1525" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1575" y="200" />
+        <di:waypoint x="1622" y="200" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
+

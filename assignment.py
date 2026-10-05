@@ -1133,8 +1133,11 @@ def _(mo):
         mo.md("**Task 4.2.3, BPMN workflow graph for the fine object (`bpmn/fine_object.bpmn`):**"),
         mo.image(src="bpmn/fine_object.svg"),
         mo.md(r"""
-    My current understanding of how a fine *should* move through the
-    process, using each of the 6 fine object activities exactly once:
+    The model was built in bpmn.io on top of the Canvas template
+    (`Fine-Object-Template.bpmn`), so the 6 fine object activities keep the
+    template's names and IDs. It shows my current understanding of how a
+    fine *should* move through the process, using each of these activities
+    exactly once:
 
     - Every case starts with `Create Fine`. If the offender pays right away
       (on the spot), the fine goes straight to `Payment`, which matches
@@ -1149,23 +1152,46 @@ def _(mo):
       (variant 1 from Task 4.1.1b).
     - `Payment` can repeat as long as the fine isn't fully paid yet,
       because partial payments and installments are legitimate. This is
-      exactly what we saw in case `A10009` in Task 4.1.2c.
+      exactly what we saw in case `A10009` in Task 4.1.2c. The three "paid"
+      branches are first merged by one XOR join, and the installment loop
+      has its own XOR join right before `Payment`, so the loop stays a
+      clean, structured block.
 
     The model is a proper workflow graph: one start event, one end event,
-    only XOR gateways, and every node lies on a path from start to end.
-    Because it uses only XOR gateways, there's never more than one token in
-    the net, so a lack of synchronization can't happen. And since there's
-    no AND-join, it can't deadlock either, so the model is **sound**. I also
-    double-checked this by converting the BPMN file into a Petri net with
-    pm4py and running its Woflan soundness check, which confirms it's sound.
+    only XOR gateways (each one either a split or a join), every task with
+    exactly one incoming and one outgoing flow, and every node lies on a
+    path from start to end. Because it uses only XOR gateways, there's
+    never more than one token in the net, so a lack of synchronization
+    can't happen. And since there's no AND-join, it can't deadlock either,
+    so the model is **sound**. The cell below double-checks this by
+    converting the BPMN file into a Petri net with pm4py and running its
+    Woflan soundness check.
 
     Behavior from Task 4.1.2a that deliberately does *not* fit this model:
     `Payment -> Add penalty` (a penalty after a payment), `Add penalty`
     without any follow-up, and `Create Fine -> Send Fine` cases that just
-    stop. Those are exactly the deviations to examine with conformance
-    checking in Session 5.
+    stop. The same goes for partial payments followed by
+    `Send for Credit Collection` or `Send Fine` in the process map. Those
+    are exactly the deviations to examine with conformance checking in
+    Session 5.
     """),
     ])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo, pm4py):
+    # Task 4.2.3: verify soundness of the BPMN model (BPMN -> Petri net -> Woflan)
+    _bpmn = pm4py.read_bpmn('bpmn/fine_object.bpmn')
+    _net, _im, _fm = pm4py.convert_to_petri_net(_bpmn)
+    _is_sound = pm4py.check_soundness(_net, _im, _fm)[0]
+
+    mo.md(f"""
+    **Soundness check (pm4py, Woflan) on `bpmn/fine_object.bpmn`:**
+    the converted Petri net has {len(_net.places)} places and
+    {len(_net.transitions)} transitions, and the model is
+    **{'sound' if _is_sound else 'NOT sound'}**.
+    """)
     return
 
 
