@@ -1135,9 +1135,9 @@ def _(mo):
         mo.md(r"""
     The model was built in bpmn.io on top of the Canvas template
     (`Fine-Object-Template.bpmn`), so the 6 fine object activities keep the
-    template's names and IDs. It shows my current understanding of how a
-    fine *should* move through the process, using each of these activities
-    exactly once:
+    template's names and IDs. It shows our current understanding of how a
+    fine *should* move through the process. Each of the 6 activities
+    appears exactly once as a task in the model:
 
     - Every case starts with `Create Fine`. If the offender pays right away
       (on the spot), the fine goes straight to `Payment`, which matches
@@ -1150,9 +1150,10 @@ def _(mo):
       penalized amount or the fine is escalated via `Send for Credit
       Collection`, which ends the fine object's lifecycle without a payment
       (variant 1 from Task 4.1.1b).
-    - `Payment` can repeat as long as the fine isn't fully paid yet,
-      because partial payments and installments are legitimate. This is
-      exactly what we saw in case `A10009` in Task 4.1.2c. The three "paid"
+    - `Payment` can repeat as long as the fine isn't fully paid yet, since
+      I'd expect paying in installments to be allowed, as long as the full
+      amount is paid in the end (case `A10009` from Task 4.1.2c is an
+      example of this). The three "paid"
       branches are first merged by one XOR join, and the installment loop
       has its own XOR join right before `Payment`, so the loop stays a
       clean, structured block.
@@ -1166,14 +1167,6 @@ def _(mo):
     so the model is **sound**. The cell below double-checks this by
     converting the BPMN file into a Petri net with pm4py and running its
     Woflan soundness check.
-
-    Behavior from Task 4.1.2a that deliberately does *not* fit this model:
-    `Payment -> Add penalty` (a penalty after a payment), `Add penalty`
-    without any follow-up, and `Create Fine -> Send Fine` cases that just
-    stop. The same goes for partial payments followed by
-    `Send for Credit Collection` or `Send Fine` in the process map. Those
-    are exactly the deviations to examine with conformance checking in
-    Session 5.
     """),
     ])
     return
