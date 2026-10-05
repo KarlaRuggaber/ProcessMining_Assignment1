@@ -7,7 +7,7 @@ app = marimo.App(width="medium")
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Assigment 1 Template
+    # Assignment 1: Road Traffic Fine Management Process
     """)
     return
 
@@ -29,6 +29,16 @@ def _(pm4py):
     print(len(event_log_from_disk), 'events read.')
     event_log_from_disk
     return (event_log_from_disk,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Session 1
+
+    ## Task 1.1
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -107,30 +117,28 @@ def _(df, mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Session 1
+    **Task 1.1, answers:**
 
-    ## Task 1.1
+    a) The log covers the period from 1999-12-31 23:00:00 UTC to 2013-06-17 22:00:00 UTC,
+    i.e. from 2000-01-01 to 2013-06-18 in Italian local time (cf. Task 2.1.1), roughly
+    13.5 years.
 
-    a) The log covers the period from 1999-12-31 23:00:00 UTC to 2013-06-17 22:00:00 UTC.
+    b) vehicleClass has 4 distinct values: A, C, M, and R. 411,100 events don't have a
+    value for this attribute, because it is only recorded at `Create Fine`.
 
-    b) vehicleClass has 4 distinct values: A, C, M, and R. A number of events simply
-       don't have a value recorded for this attribute.
+    c) For the initial `amount` of each case (at its Create Fine event):
+    min 0.0, median 35.0, max 4351.0.
 
-    c) For Create Fine events, the amount attribute has the following stats:
-      - Min: 0.0
-      - Median: 35.0
-      - Max: 4351.0
-
-      The distribution is heavily right-skewed: the max (4351) is more than 100 times
-      the median (35), so there are clearly some extreme outliers in there. It would be
-      worth digging into which cases end up with such high fines, maybe certain vehicle
-      classes, violation types, or time periods stand out, and checking whether the
-      zero-amount fines are a data quality issue or an actual case type of their own.
+    The distribution is heavily right-skewed: the max (4351) is more than 100 times
+    the median (35), so there are clearly some extreme outliers in there. It would be
+    worth digging into which cases end up with such high fines, maybe certain vehicle
+    classes, violation types, or time periods stand out, and checking whether the
+    zero-amount fines are a data quality issue or an actual case type of their own.
 
     d) There are 3,548 events with a points value greater than 0, and all of them are
-      tied to the "Create Fine" activity. That number matches the number of affected
-      cases exactly, so each case that gets points, gets them exactly once, right when
-      the fine is created.
+    tied to the "Create Fine" activity. That number matches the number of affected
+    cases exactly, so each case that gets points, gets them exactly once, right when
+    the fine is created.
     """)
     return
 
@@ -148,9 +156,9 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(df, mo):
     # 2.1.1 granularity of the timestamps
-    seconds = sorted(df['time:timestamp'].dt.second.unique())
-    minutes = sorted(df['time:timestamp'].dt.minute.unique())
-    hours   = sorted(df['time:timestamp'].dt.hour.unique())
+    seconds = sorted(int(v) for v in df['time:timestamp'].dt.second.unique())
+    minutes = sorted(int(v) for v in df['time:timestamp'].dt.minute.unique())
+    hours   = sorted(int(v) for v in df['time:timestamp'].dt.hour.unique())
 
     mo.md(f"""
     **Checking the timestamp granularity:**
@@ -164,6 +172,12 @@ def _(df, mo):
     active (00:00 CET becomes 23:00 UTC, 00:00 CEST becomes 22:00 UTC). So in
     practice the timestamps only carry **day-level granularity**: every event
     is dated to a specific calendar day, nothing more precise than that.
+    One side effect: since the log stores UTC, every date shown in this
+    notebook is one day *earlier* than the actual Italian date (e.g. an
+    event shown as `2007-03-08 23:00 UTC` really happened on 2007-03-09).
+    Another one: events of the same case on the same day can't be ordered
+    reliably, which causes problems later on (cf. Task 2.2.4b). For the
+    data collection, we'd suggest recording full timestamps in local time.
     """)
     return
 
@@ -198,10 +212,12 @@ def _(df, mo, pd):
         mo.ui.table(_incomplete_df),
         mo.md(f"""
     Only one activity schema turns out to be incomplete: `Insert Fine Notification`'s
-    `lastSent` attribute is missing for {int(_incomplete_df['missing'].iloc[0]) if len(_incomplete_df) else 0}
-    out of {int(_incomplete_df['events_of_activity'].iloc[0]) if len(_incomplete_df) else 0}
+    `lastSent` attribute is missing for {int(_incomplete_df['missing'].iloc[0]) if len(_incomplete_df) else 0:,}
+    out of {int(_incomplete_df['events_of_activity'].iloc[0]) if len(_incomplete_df) else 0:,}
     events. Every other local attribute, for every other activity, is
-    complete, filled for 100% of that activity's events.
+    complete, filled for 100% of that activity's events. On top of that,
+    the meaning of `lastSent` isn't documented at all (the attribute
+    description just says "N/A"), so it should be documented or dropped.
     """),
     ])
     return
@@ -238,11 +254,14 @@ def _(df, mo, pd):
     _ap = df.loc[df['concept:name'] == 'Add penalty', ['case:concept:name', 'amount']].rename(columns={'amount': 'amount_penalty'})
     _amount_check = _cf.merge(_ap, on='case:concept:name')
     _amount_ratio = (_amount_check['amount_penalty'] / _amount_check['amount_create']).replace([float('inf')], pd.NA).dropna()
+    _n_up = int((_amount_check['amount_penalty'] > _amount_check['amount_create']).sum())
+    _n_same = int((_amount_check['amount_penalty'] == _amount_check['amount_create']).sum())
+    _n_down = int((_amount_check['amount_penalty'] < _amount_check['amount_create']).sum())
 
     # verify the "totalPaymentAmount" attribute: is it the running sum of
     # paymentAmount across the Payment events of the same case?
     _pay = df.loc[df['concept:name'] == 'Payment', ['case:concept:name', 'time:timestamp', 'paymentAmount', 'totalPaymentAmount']] \
-             .sort_values(['case:concept:name', 'time:timestamp']).copy()
+             .sort_values(['case:concept:name', 'time:timestamp'], kind='stable').copy()
     _pay['cumsum_check'] = _pay.groupby('case:concept:name')['paymentAmount'].cumsum()
     _pay_match_rate = (( _pay['cumsum_check'] - _pay['totalPaymentAmount']).abs() < 0.01).mean()
 
@@ -258,21 +277,24 @@ def _(df, mo, pd):
     **Are the numerical shared attributes cumulative or incremental?**
 
     - `amount` (shows up at `Create Fine` and `Add penalty`) turns out to be
-      **case-cumulative**. I checked all {len(_amount_check):,} cases that
-      have both events, and `amount` always goes up from `Create Fine` to
-      `Add penalty`, by a factor of {_amount_ratio.mean():.2f} on average
+      **case-cumulative**. We checked all {len(_amount_check):,} cases that
+      have both events: `amount` goes up from `Create Fine` to `Add penalty`
+      in {_n_up:,} of them, stays the same in {_n_same}, and goes down in
+      exactly {_n_down}. On average it grows by a factor of
+      {_amount_ratio.mean():.2f}
       (median {_amount_ratio.median():.2f}). That lines up with the statutory
       late-payment penalty roughly doubling the fine. So it's not really a
-      running sum of increments, it's a recalculated total that only ever
-      grows within a case, which is exactly what makes it case-cumulative
+      running sum of increments, it's a recalculated total that never goes
+      down within a case, which is exactly what makes it case-cumulative
       rather than a standalone value.
     - `totalPaymentAmount` (shows up at `Create Fine` and `Payment`) is also
       **case-cumulative**, and here the check is even more direct: across
       all {len(_pay):,} `Payment` events, `totalPaymentAmount` matches
       `cumsum(paymentAmount)` within the same case for {_pay_match_rate:.1%}
-      of them (the small deviations are probably payments that happened
-      before the log's observation window started). So this one really is a
-      genuine running sum of payments made so far.
+      of them. The few deviations come from same-day payments and from
+      payments that never show up as `Payment` events, see Task 2.2.4b. So
+      apart from those, this one really is a running sum of payments made
+      so far.
     - `org:resource` and `dismissal` are shared too, but they're categorical,
       not numerical, so the cumulative/incremental question doesn't apply to
       them.
@@ -289,30 +311,40 @@ def _(df, mo):
 
     display_cols = [
         'time:timestamp', 'concept:name', 'amount', 'totalPaymentAmount',
-        'paymentAmount', 'expense', 'notificationType', 'dismissal', 'org:resource',
+        'paymentAmount', 'expense', 'article', 'vehicleClass', 'points',
+        'notificationType', 'lastSent', 'dismissal', 'org:resource',
     ]
 
     mo.vstack([
         mo.md(f"**Case `{selected_case_id}`** ({len(case_events)} events):"),
         mo.ui.table(case_events[display_cols].reset_index(drop=True)),
         mo.md("""
-    **Going through the case event by event:**
+    **Going through the case event by event** (dates as stored in the log,
+    i.e. UTC, cf. Task 2.1.1):
 
     - **2007-03-08, `Create Fine`**: the fine gets created with a base
-      `amount` of 36, and `totalPaymentAmount` starts at 0. No penalty
-      points for this violation.
+      `amount` of 36, and `totalPaymentAmount` starts at 0. The violation
+      is `article` 157 (stopping and parking), committed with a vehicle of
+      `vehicleClass` A, and it costs 0 `points`, so it's a minor offence.
+      Employee `org:resource` 561 created the fine, and `dismissal` is
+      initialized to "NIL", meaning the fine hasn't been dismissed.
     - **2007-07-16, `Send Fine`** (about 4 months later): the fine notice
       goes out to the offender, with an `expense` of 13 recorded for
       sending it.
     - **2007-08-01, `Insert Fine Notification`** (roughly 2 weeks after
-      sending): the notification gets formally registered, `notificationType`
-      is "P" and `lastSent` is set to "P" too.
-    - **2007-09-30, `Add penalty`** (about 2 months after the notification,
-      so past the payment deadline): a penalty kicks in and `amount` jumps
-      from 36 to 74, the new case-cumulative total owed.
+      sending): the offender receives the notification. `notificationType`
+      is "P", so the fine refers to the car owner, and `lastSent` is "P" too
+      (its meaning isn't documented).
+    - **2007-09-30, `Add penalty`** (exactly 60 days after the
+      notification, which is the payment deadline): a penalty kicks in and
+      `amount` jumps from 36 to 74, the new case-cumulative total owed.
     - **2008-09-08, `Payment`** (almost a year later): a payment of 87 comes
-      in, `totalPaymentAmount` updates to 87 too, covering the full
-      penalized amount plus the extra costs, and the case is settled.
+      in, `totalPaymentAmount` updates to 87 too. That's exactly the
+      penalized amount plus the sending expense (74 + 13), so the case is
+      settled.
+
+    Only `Create Fine` carries a resource here; none of the later events
+    record which employee handled them.
 
     All in all the case stretches over about 1.5 years from creation to
     payment, with pretty long gaps between events. The payment only shows up
@@ -387,35 +419,61 @@ def _(df_task4, mo):
     _comparable['deviation'] = _comparable['payment_cumsum'] - _comparable['totalPaymentAmount']
     _mismatch = _comparable[_comparable['deviation'].abs() > 0.01]
 
-    _dev_case_id = _mismatch.loc[_mismatch['concept:name'] == 'Payment', 'case:concept:name'].iloc[0]
+    # split the deviating cases: those with two Payment events on the same day vs. the rest
+    _payments = df_task4[df_task4['concept:name'] == 'Payment']
+    _payments_per_day = _payments.groupby(['case:concept:name', 'time:timestamp']).size()
+    _same_day_cases = set(_payments_per_day[_payments_per_day > 1].index.get_level_values(0))
+    _dev_cases = list(_mismatch['case:concept:name'].unique())
+    _same_day_dev = [c for c in _dev_cases if c in _same_day_cases]
+    _other_dev = [c for c in _dev_cases if c not in _same_day_cases]
+
     _dev_cols = ['time:timestamp', 'concept:name', 'paymentAmount', 'payment_cumsum', 'totalPaymentAmount']
-    _dev_case = df_task4.loc[df_task4['case:concept:name'] == _dev_case_id, _dev_cols].reset_index(drop=True)
+    _ex_same_day = df_task4.loc[df_task4['case:concept:name'] == _same_day_dev[0], _dev_cols].reset_index(drop=True)
+    _ex_other = df_task4.loc[df_task4['case:concept:name'] == _other_dev[0], _dev_cols].reset_index(drop=True)
 
     mo.vstack([
         mo.md(f"""
-    I compared `payment_cumsum` to `totalPaymentAmount` at the
+    We compared `payment_cumsum` to `totalPaymentAmount` at the
     {len(_comparable):,} events where `totalPaymentAmount` is actually
     defined (`Create Fine` and `Payment`). They agree in
-    {(1 - len(_mismatch) / len(_comparable)):.3%} of cases, leaving
+    {(1 - len(_mismatch) / len(_comparable)):.3%} of these events, leaving
     {len(_mismatch)} deviating events ({len(_mismatch) / len(_comparable):.3%}).
     All of these happen at a `Payment` event, and in every single one,
     `payment_cumsum` is *smaller* than `totalPaymentAmount`, by
     {_mismatch['deviation'].abs().mean():.1f} on average and up to
     {_mismatch['deviation'].abs().max():.1f}.
+
+    The deviating events belong to {len(_dev_cases)} cases, which fall into
+    two groups.
     """),
-        mo.md(f"**One of the deviating cases, `{_dev_case_id}`:**"),
-        mo.ui.table(_dev_case),
+        mo.md(f"""
+    **1. Two payments on the same day ({len(_same_day_dev)} cases),** e.g.
+    case `{_same_day_dev[0]}`:
+    """),
+        mo.ui.table(_ex_same_day),
         mo.md("""
-    All of these deviations happen for cases with **two `Payment` events on
-    the same calendar day** (the log can't tell them apart at day-level
-    granularity). `totalPaymentAmount` already shows the *final* total,
-    after both same-day payments, on the *first* of the two rows, while
-    `payment_cumsum` correctly shows only the running total right after
-    that individual payment. That looks like a data-quality issue in
-    `totalPaymentAmount`: it seems to have been computed with knowledge of
-    the case's eventual total rather than strictly as a running sum up to
-    each event. It's a good reminder of why the lecture tells you to verify
-    a pre-existing attribute instead of just trusting it.
+    The two `Payment` events share a calendar day, so at day-level
+    granularity the log can't say which came first. `totalPaymentAmount`
+    already shows the total after *both* payments on the first of the two
+    rows, while `payment_cumsum` only adds up the payments up to that row.
+    """),
+        mo.md(f"""
+    **2. Payments missing from the log ({len(_other_dev)} cases),** e.g.
+    case `{_other_dev[0]}`:
+    """),
+        mo.ui.table(_ex_other),
+        mo.md("""
+    Here `totalPaymentAmount` goes up by *more* than the `paymentAmount` of
+    the event itself, so it counts money that never shows up as a `Payment`
+    event. Either some payments were never logged as events, or the system
+    counted a payment twice. We can't tell which from the log alone.
+
+    Either way, `totalPaymentAmount` isn't fully reliable as a running sum
+    of the logged payments. That's a good reminder of why the lecture says
+    to verify a pre-existing attribute instead of just trusting it. For
+    the data collection, we'd suggest logging every payment as its own
+    `Payment` event and deriving `totalPaymentAmount` from those events
+    instead of storing it separately.
     """),
     ])
     return
@@ -434,9 +492,12 @@ def _(df_task4, mo):
     df_task5['expense_so_far'] = df_task5.groupby('case:concept:name')['expense_so_far'].ffill()
     df_task5['expense_so_far'] = df_task5['expense_so_far'].fillna(0)
 
+    # round to cents: amounts like 33.6 or 31.3 leave float residues such as
+    # 1e-14 that would otherwise be counted as > 0 or < 0 (cf. lecture slide
+    # on floating point imprecision for money)
     df_task5['outstanding_amount'] = (
         df_task5['amount_due_so_far'] + df_task5['expense_so_far'] - df_task5['payment_cumsum']
-    )
+    ).round(2)
 
     mo.md("""
     **Enrichment `outstanding_amount`:** for every event, how much the
@@ -450,7 +511,10 @@ def _(df_task4, mo):
     - `payment_cumsum`, the running total of payments so far, already built
       in Task 2.2.4.
 
-    Put together: `outstanding_amount = amount_due_so_far + expense_so_far - payment_cumsum`.
+    Put together: `outstanding_amount = amount_due_so_far + expense_so_far - payment_cumsum`,
+    rounded to 2 decimals. Without the rounding, floating point leftovers
+    like `0.00000000000001` would wrongly count as "still owed" or
+    "overpaid" (the lecture's warning about floats and money).
     """)
     return (df_task5,)
 
@@ -500,8 +564,9 @@ def _(df_task5, mo):
       handful of later events in cases that are already settled.
     - **Negative:** {_n_negative:,} events ({_n_negative / _n_total:.1%}),
       meaning the case looks overpaid at that point. Probably a mix of
-      actual overpayments and the same kind of same-day payment-ordering
-      artifact found in Task 2.2.4b.
+      actual overpayments and the same kind of payment-recording issues
+      found in Task 2.2.4b (same-day ordering, payments missing from the
+      log).
     """)
     return
 
@@ -539,21 +604,25 @@ def _(df, mo):
     case_log['initial_fine_amount'] = _cases['amount'].apply(lambda s: s.dropna().iloc[0] if s.notna().any() else None)
     case_log['final_fine_amount'] = _cases['amount'].apply(lambda s: s.dropna().iloc[-1] if s.notna().any() else None)
 
+    _all_start_with_create_fine = bool((_cases['concept:name'].first() == 'Create Fine').all())
+
     mo.vstack([
         mo.md(f"""
     Here's the **case log**, built by aggregating the event log per case
     ({len(case_log):,} cases in total). On top of `start_time`, `end_time`
     and `no_of_events`, it includes every **case attribute**, meaning an
-    attribute with at most one distinct non-null value per case. I found
+    attribute with at most one distinct non-null value per case. We found
     these by checking
     `event_log.groupby(case_id)[attr].nunique().max() <= 1` for each
     non-mandatory attribute, which gives: `{_case_attr_cols}`.
 
     New enrichment: **`initial_fine_amount`**, the first non-null value of
-    `amount` per case (the same as the `amount` at the case's `Create Fine`
-    event, since every case starts there, see Task 2.2.4). While I'm at it,
-    I also add `final_fine_amount` (last non-null value of `amount`) the
-    same way, since it's needed again in Task 2.3.6 below.
+    `amount` per case. This is the same as the `amount` at the case's
+    `Create Fine` event, because {'every' if _all_start_with_create_fine else 'NOT every'}
+    case starts with `Create Fine` (we checked the first event of all
+    {len(case_log):,} cases). While we're at it, we also
+    add `final_fine_amount` (last non-null value of `amount`) the same way,
+    since it's needed again in Task 2.3.6 below.
     """),
         mo.ui.table(case_log.reset_index().head(20)),
     ])
@@ -567,7 +636,7 @@ def _(mo):
 
     Italian traffic fines follow a statutory tariff schedule tied to the
     specific violation (the `article` of the traffic code that was broken),
-    they're not set freely case by case. My hypothesis is that
+    they're not set freely case by case. Our hypothesis is that
     `initial_fine_amount` won't look like a smooth, continuous distribution
     at all, but a **discrete, multimodal** one: a handful of standard tariff
     amounts should show up over and over, sharp spikes at those exact
@@ -592,7 +661,7 @@ def _(case_log, mo, px):
         mo.md(f"""
     **Two things stand out here**, and both confirm the hypothesis above:
     1. The distribution really is **discrete and spiky**, not continuous.
-       The 5 most common exact amounts (`{dict(_top_values)}`) alone cover
+       The 5 most common exact amounts ({', '.join(f'{a:g} ({n:,} cases)' for a, n in _top_values.items())}) alone cover
        {_top_share:.1%} of all {len(case_log):,} cases, a pretty clear sign
        of a small set of statutory tariffs rather than amounts that vary
        freely.
@@ -673,7 +742,7 @@ def _(case_log, mo, pd, px):
         mo.ui.table(_top3.reset_index().rename(columns={'count': 'no_of_cases'})),
         mo.ui.plotly(_fig),
         mo.md(f"""
-    **Noteworthy fact:** just **3 article codes, {list(_top3.index)}, account
+    **Noteworthy fact:** just **3 article codes, {', '.join(f'{a:g}' for a in _top3.index)}, account
     for {_top3_share:.1%}** of all {case_log['article'].notna().sum():,} cases
     that have a recorded article, out of {case_log['article'].nunique()}
     distinct codes that occur at all. So almost all fines in this log come
@@ -721,7 +790,7 @@ def _(mo):
 
     These can genuinely co-occur (a case can be paid and still appealed, or
     sent to collection and later appealed), and plenty of cases in the log
-    are still open and hit none of them, so it's worth checking the overlaps
+    end without reaching any of them, so it's worth checking the overlaps
     and the "no outcome" bucket rather than assuming the three partition the
     cases cleanly.
     """)
@@ -747,7 +816,7 @@ def _(case_log, df_task5, mo, pd):
     _n_total = len(case_log_outcomes)
 
     _single_counts = pd.DataFrame([
-        {'outcome': o, 'no_of_cases': int(case_log_outcomes[o].sum()), 'share': case_log_outcomes[o].mean()}
+        {'outcome': o, 'no_of_cases': int(case_log_outcomes[o].sum()), 'share': f'{case_log_outcomes[o].mean():.1%}'}
         for o in _outcomes
     ])
 
@@ -761,6 +830,13 @@ def _(case_log, df_task5, mo, pd):
 
     _n_none = int((~case_log_outcomes[_outcomes[0]] & ~case_log_outcomes[_outcomes[1]] & ~case_log_outcomes[_outcomes[2]]).sum())
 
+    # edge cases of the definitions: zero-amount fines count as "paid" without any
+    # payment, and dismissed fines (dismissal other than NIL) have no outcome of their own
+    _has_payment = df_task5.groupby('case:concept:name')['concept:name'].apply(lambda s: 'Payment' in set(s))
+    _n_paid_without_payment = int((case_log_outcomes['outcome_paid'] & ~_has_payment).sum())
+    _is_dismissed = df_task5.groupby('case:concept:name')['dismissal'].apply(lambda s: s.dropna().ne('NIL').any())
+    _n_dismissed = int(_is_dismissed.sum())
+
     mo.vstack([
         mo.md("**Cases per outcome:**"),
         mo.ui.table(_single_counts),
@@ -768,11 +844,24 @@ def _(case_log, df_task5, mo, pd):
         mo.ui.table(_pair_counts),
         mo.md(f"""
     **Cases with none of the three outcomes:** {_n_none:,} out of {_n_total:,}
-    ({_n_none / _n_total:.1%}). These are cases that, as far as the log
-    shows, are still stuck somewhere in the middle of the process: the fine
-    was created and maybe sent, but it was never paid off, never escalated
-    to collection, and never appealed before the log's observation window
-    ends.
+    ({_n_none / _n_total:.1%}). In these cases the fine was created and
+    maybe sent, but the log never records a full payment, an escalation to
+    collection or an appeal. Many of them stop years before the log ends
+    in 2013, so it's not just that the recording period ran out. More
+    likely explanations are a payment that was never logged, a dismissal,
+    or an offender who couldn't be reached (see Task 3.1d).
+
+    **Two edge cases of our definitions:**
+    - {_n_paid_without_payment} cases count as paid without a single
+      `Payment` event. These are the zero-amount fines from Task 1.1c:
+      nothing is owed, so `outstanding_amount` is 0 right away. That's
+      technically correct, but worth knowing.
+    - {_n_dismissed:,} cases have a `dismissal` value other than "NIL" at
+      some point, i.e. the fine was dismissed (e.g. "#" by the prefecture,
+      "G" by the judge, plus several undocumented codes). None of our three
+      outcomes covers a dismissal on its own, so "dismissed" would be a
+      natural fourth outcome. The undocumented codes (e.g. "A", "T", "D")
+      should be documented, since right now we can't say what they mean.
     """),
     ])
     return (case_log_outcomes,)
@@ -782,7 +871,7 @@ def _(case_log, df_task5, mo, pd):
 def _(case_log_outcomes, df_task5, mo):
     # Task 3.1b: inspect and interpret a case for each of the three outcomes
     _outcome_cols = ['outcome_paid', 'outcome_credit_collection', 'outcome_appealed']
-    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount']
+    _cols = ['time:timestamp', 'concept:name', 'amount_due_so_far', 'expense_so_far', 'payment_cumsum', 'outstanding_amount', 'dismissal']
 
     def _case_table(case_id):
         _table = df_task5.loc[df_task5['case:concept:name'] == case_id, _cols].reset_index(drop=True)
@@ -818,7 +907,11 @@ def _(case_log_outcomes, df_task5, mo):
     Prefecture` follows a bit later (the penalty still gets added in
     between, since the appeal doesn't automatically freeze the fine
     amount). `outcome_appealed` picks this up through the appeal-related
-    activities, regardless of how the appeal turns out.
+    activities. In this case the appeal actually succeeded: the
+    `Send Appeal to Prefecture` event carries `dismissal` "#", which means
+    the prefecture dismissed the fine. That explains why no payment and no
+    credit collection ever follow, even though `outstanding_amount` stays
+    positive (the enrichment doesn't know about dismissals).
     """),
     ])
     return
@@ -884,13 +977,21 @@ def _(case_log_outcomes, df_task5, mo):
         mo.ui.table(_case_table),
         mo.md("""
     This case only has two events: the fine gets created, then it gets
-    sent to the offender, and that's it, nothing else is recorded. No
-    payment, no penalty even, no escalation to collection, no appeal. It
-    simply doesn't show any further activity before the log's observation
-    window ends on 2013-06-17, so we can't tell from the data alone whether
-    it was quietly paid off through some other channel, forgotten, or just
-    cut off by the end of the recording period. Either way, it's a case
-    that the log leaves genuinely unresolved.
+    sent to the offender in December 2006, and that's it. No payment, no
+    penalty, no escalation to collection, no appeal, and `dismissal` stays
+    "NIL". The log runs until 2013, so the case wasn't simply cut off by
+    the end of the recording period; it just stops more than six years
+    earlier. Notably, `Insert Fine Notification` never happens, so the
+    offender apparently never received the fine. That would explain why
+    no penalty follows, since the payment deadline only starts with the
+    notification. Possible reasons are an offender who couldn't be reached
+    (e.g. a wrong address), or a payment that happened outside the system
+    and was never logged. Either way, the log leaves this case unresolved.
+
+    Case `A1` isn't an exception: around 20,000 cases follow exactly this
+    `Create Fine -> Send Fine` pattern (variant 3 in Task 4.1.1b). An open
+    question for us is whether these fines were never delivered, paid
+    outside the system, or simply dropped.
     """),
     ])
     return
@@ -917,7 +1018,7 @@ def _(df, mo, pd):
     _n_variants = len(variant_counts)
 
     _top_df = pd.DataFrame([
-        {'variant': ' -> '.join(v), 'no_of_cases': int(c), 'share': c / _n_cases}
+        {'variant': ' -> '.join(v), 'no_of_cases': int(c), 'share': f'{c / _n_cases:.1%}'}
         for v, c in variant_counts.head(10).items()
     ])
 
@@ -948,6 +1049,8 @@ def _(mo, variant_counts):
     consistent with the heavily skewed, tariff-driven nature of this
     process that we've already seen for other attributes (Task 2.3.5b,
     2.3.7): most cases funnel through just a handful of standard paths.
+    This surprised us a bit, since the 231 distinct variants suggest a
+    much messier process than it actually is.
     """)
     return
 
@@ -971,8 +1074,10 @@ def _(mo, variant_counts):
     2. `{' -> '.join(_top4.index[1])}`: the fine is created and paid
        immediately, without any of the sending or notification steps ever
        happening.
-    3. `{' -> '.join(_top4.index[2])}`: the fine is created and sent, and
-       nothing else happens before the log's observation window ends.
+    3. `{' -> '.join(_top4.index[2])}`: the fine is created and sent, but
+       no notification is ever recorded as received and nothing else
+       happens (these cases stop in every year from 2000 to 2013, so
+       it's not just the end of the log, cf. Task 3.1d).
     4. `{' -> '.join(_top4.index[3])}`: the fine goes through the full
        notify-and-penalize cycle, but this time it does get paid off
        afterward, so no escalation is needed.
@@ -996,7 +1101,7 @@ def _(df, mo):
     mo.md(f"""
     Filtering the event log down to just the fine object's 6 activities
     (`{fine_activities}`) keeps all {len(_fine_variants):,} cases (every
-    case starts with `Create Fine`, cf. Task 2.2.4), but the number of
+    case starts with `Create Fine`, cf. Task 2.3.5), but the number of
     distinct sequential variants drops from **{_full_variants.nunique()} to
     {_fine_variants.nunique()}**. Removing the 5 appeal-related activities
     collapses a lot of near-duplicate variants into the same shorter
@@ -1005,7 +1110,7 @@ def _(df, mo):
     small minority of cases (cf. `outcome_appealed`, 3.0% of cases, in
     Task 3.1a).
     """)
-    return
+    return (df_fine,)
 
 
 @app.cell(hide_code=True)
@@ -1058,7 +1163,7 @@ def _(mo):
 
     Using Disco's Follower filter (`Payment` directly followed by `Payment`)
     on the fine object sub-log isolates the 4,018 cases behind the
-    `Payment → Payment` self-loop from the process map. Within that filtered
+    `Payment -> Payment` self-loop from the process map. Within that filtered
     set, the dominant variant (3,793 of those cases, 94.4%) is:
 
     ```
@@ -1077,16 +1182,37 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(df, mo):
+def _(df, df_fine, mo):
     # Task 4.1.2c: inspect case A10009 (the example of the variant from 4.1.2b) and explain the unexpected behavior
     _cols = ['time:timestamp', 'concept:name', 'amount', 'expense', 'paymentAmount', 'totalPaymentAmount']
-    _case = df.loc[df['case:concept:name'] == 'A10009', _cols].sort_values('time:timestamp').reset_index(drop=True)
+    _case = df.loc[df['case:concept:name'] == 'A10009', _cols].sort_values('time:timestamp', kind='stable').reset_index(drop=True)
 
-    _base_amount = 22.0
-    _penalized_amount = 44.0
-    _expense = 13.0
-    _payment_1 = 35.0
-    _payment_2 = 22.0
+    def _value(activity, col):
+        return _case.loc[_case['concept:name'] == activity, col].iloc[0]
+
+    _base_amount = _value('Create Fine', 'amount')
+    _penalized_amount = _value('Add penalty', 'amount')
+    _expense = _case['expense'].sum()
+    _payment_1, _payment_2 = _case.loc[_case['concept:name'] == 'Payment', 'paymentAmount'].tolist()
+    _payment_dates = _case.loc[_case['concept:name'] == 'Payment', 'time:timestamp'].tolist()
+    _penalty_date = _value('Add penalty', 'time:timestamp')
+    _days_to_penalty = (_penalty_date - _value('Insert Fine Notification', 'time:timestamp')).days
+
+    # does the same pattern hold for the other cases of this variant (fine object sub-log)?
+    _variant = ('Create Fine', 'Send Fine', 'Insert Fine Notification', 'Add penalty', 'Payment', 'Payment')
+    _seqs = df_fine.groupby('case:concept:name')['concept:name'].apply(tuple)
+    _sub = df_fine[df_fine['case:concept:name'].isin(_seqs[_seqs == _variant].index)]
+
+    def _per_case(activity, col):
+        return _sub[_sub['concept:name'] == activity].groupby('case:concept:name')[col].first()
+
+    _init = _per_case('Create Fine', 'amount')
+    _pen = _per_case('Add penalty', 'amount')
+    _exp = _sub.groupby('case:concept:name')['expense'].sum()
+    _pays = _sub[_sub['concept:name'] == 'Payment'].groupby('case:concept:name')['paymentAmount']
+    _share_first = ((_pays.first() - (_init + _exp)).abs() < 0.01).mean()
+    _share_second = ((_pays.last() - (_pen - _init)).abs() < 0.01).mean()
+    _median_days = (_per_case('Add penalty', 'time:timestamp') - _per_case('Insert Fine Notification', 'time:timestamp')).dt.days.median()
 
     mo.vstack([
         mo.md("**Case `A10009`:**"),
@@ -1104,15 +1230,29 @@ def _(df, mo):
 
     So the first payment covers exactly what the offender was originally
     told they owed (the base fine plus the sending expense), from before
-    any penalty existed. The `Add penalty` event happens on 2007-09-20,
-    but the first payment only arrives on 2007-09-30, after the penalty
-    was already applied in the system, so the offender was effectively
-    paying off an amount that was already outdated. The second payment,
-    a month later, covers exactly the extra amount added by the penalty.
+    any penalty existed. `Add penalty` happens on {_penalty_date:%Y-%m-%d},
+    exactly {_days_to_penalty} days after the notification (the payment
+    deadline), but the first payment only arrives on
+    {_payment_dates[0]:%Y-%m-%d}, after the penalty was already applied.
+    So the offender paid an amount that was already outdated, just
+    {(_payment_dates[0] - _penalty_date).days} days too late. The second payment on {_payment_dates[1]:%Y-%m-%d}
+    covers exactly the extra amount added by the penalty.
+
     This looks less like a data quality issue (e.g. a duplicate or
-    erroneous payment posting) and more like the offender paying what the
+    erroneous payment posting, which is what we first suspected in
+    Task 4.1.2a) and more like the offender paying what the
     original notice said, then having to make a second, separate payment
-    once they were informed of (or realized) the late-payment surcharge.
+    once they were informed of the late-payment surcharge.
+
+    **Is A10009 typical?** Looking at all {_sub['case:concept:name'].nunique():,}
+    cases of this variant in the fine object sub-log, the first payment
+    equals base fine + expense in {_share_first:.0%} of them, and the
+    second payment equals exactly the penalty increment in
+    {_share_second:.0%}. The penalty also comes a median of
+    {_median_days:.0f} days after the notification. So the explanation
+    holds for most of the variant, not just this one case. A process
+    improvement would be to tell offenders the updated amount as soon as
+    the penalty is added, so they don't pay a stale amount.
     """),
     ])
     return
@@ -1151,7 +1291,7 @@ def _(mo):
       Collection`, which ends the fine object's lifecycle without a payment
       (variant 1 from Task 4.1.1b).
     - `Payment` can repeat as long as the fine isn't fully paid yet, since
-      I'd expect paying in installments to be allowed, as long as the full
+      we'd expect paying in installments to be allowed, as long as the full
       amount is paid in the end (case `A10009` from Task 4.1.2c is an
       example of this). The three "paid"
       branches are first merged by one XOR join, and the installment loop
