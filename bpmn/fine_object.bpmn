@@ -31,17 +31,17 @@
       <bpmn2:incoming>Flow_Penalty_No</bpmn2:incoming>
       <bpmn2:outgoing>Flow_CC_End</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_PaidOnSpot" name="Paid on the spot?">
+    <bpmn2:exclusiveGateway id="Gateway_PaidOnSpot" name="Pays on the spot?">
       <bpmn2:incoming>Flow_2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Spot_No</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_Spot_Yes</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_PaidInTime" name="Paid within deadline?">
+    <bpmn2:exclusiveGateway id="Gateway_PaidInTime" name="Pays within deadline?">
       <bpmn2:incoming>Flow_4</bpmn2:incoming>
       <bpmn2:outgoing>Flow_InTime_No</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_InTime_Yes</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_PaidAfterPenalty" name="Paid after penalty?">
+    <bpmn2:exclusiveGateway id="Gateway_PaidAfterPenalty" name="Pays after penalty?">
       <bpmn2:incoming>Flow_5</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Penalty_No</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_Penalty_Yes</bpmn2:outgoing>

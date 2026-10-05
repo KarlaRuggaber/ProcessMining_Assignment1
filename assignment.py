@@ -1157,6 +1157,8 @@ def _(mo):
       branches are first merged by one XOR join, and the installment loop
       has its own XOR join right before `Payment`, so the loop stays a
       clean, structured block.
+    - The only way out of that loop is "Fully paid? yes". So we assume that
+      once an offender starts paying, they eventually pay the full amount.
 
     The model is a proper workflow graph: one start event, one end event,
     only XOR gateways (each one either a split or a join), every task with
