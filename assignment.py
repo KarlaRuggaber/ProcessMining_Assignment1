@@ -24,7 +24,7 @@ def _():
 
 @app.cell(hide_code=True)
 def _(pm4py):
-    event_log_from_disk =  pm4py.read_xes('Road_Traffic_Fine_Management_Process.xes', variant="rustxes")
+    event_log_from_disk =  pm4py.read_xes('data/Road_Traffic_Fine_Management_Process.xes', variant="rustxes")
 
     print(len(event_log_from_disk), 'events read.')
     event_log_from_disk
@@ -1013,7 +1013,7 @@ def _(mo):
     # Task 4.1.2: process map (absolute frequency) for the fine object sub-log, inspected in Disco
     mo.vstack([
         mo.md("**Process map (absolute frequency) for the fine object sub-log, from Disco:**"),
-        mo.image(src="screenshot 4.1.2.a.png"),
+        mo.image(src="screenshots/task_4.1.2_process_map.png"),
     ])
     return
 
@@ -1070,8 +1070,8 @@ def _(mo):
     follow one right after another. Case `A10009`, below, is an example of
     this variant:
     """),
-        mo.image(src="Screenshot 2026-10-01 at 14.18.22.png"),
-        mo.image(src="Screenshot 2026-10-01 at 14.18.33.png"),
+        mo.image(src="screenshots/task_4.1.2b_case_A10009_part1.png"),
+        mo.image(src="screenshots/task_4.1.2b_case_A10009_part2.png"),
     ])
     return
 
@@ -1134,7 +1134,7 @@ def _(mo):
         mo.image(src="bpmn/fine_object.svg"),
         mo.md(r"""
     The model was built in bpmn.io on top of the Canvas template
-    (`Fine-Object-Template.bpmn`), so the 6 fine object activities keep the
+    (`bpmn/Fine-Object-Template.bpmn`), so the 6 fine object activities keep the
     template's names and IDs. It shows our current understanding of how a
     fine *should* move through the process. Each of the 6 activities
     appears exactly once as a task in the model:

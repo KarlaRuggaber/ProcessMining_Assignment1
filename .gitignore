@@ -1,7 +1,8 @@
-Road_Traffic_Fine_Management_Process.xes
-Road_Traffic_Fine_Management_Process.xes.gz
-Road Traffic Fine Management Process_1_all.zip
-Road Traffic Fine Management Process_1_all
+data/Road_Traffic_Fine_Management_Process.xes
+data/Road_Traffic_Fine_Management_Process.xes.gz
+data/Road Traffic Fine Management Process_1_all.zip
+data/Road Traffic Fine Management Process_1_all
 
-
-__marimo__
+__marimo__/
+__pycache__/
+.DS_Store
