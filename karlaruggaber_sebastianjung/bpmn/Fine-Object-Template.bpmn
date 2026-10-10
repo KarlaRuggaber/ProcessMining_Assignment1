@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:celonis="http://www.celonis.com/schema/bpmn/celonis" id="discovered-model" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.28.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:extensionElements />
+  <bpmn2:process id="Process_1" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent_-1" />
+    <bpmn2:endEvent id="EndEvent_-2" />
+    <bpmn2:task id="Task_1" name="Create Fine" />
+    <bpmn2:task id="Task_16" name="Send Fine" />
+    <bpmn2:task id="Task_28" name="Insert Fine Notification" />
+    <bpmn2:task id="Task_25" name="Add penalty" />
+    <bpmn2:task id="Task_18" name="Payment" />
+    <bpmn2:task id="Task_9" name="Send for Credit Collection" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="StartEvent_-1_di" bpmnElement="StartEvent_-1">
+        <dc:Bounds x="160" y="253" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">
+        <dc:Bounds x="310" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_16_di" bpmnElement="Task_16">
+        <dc:Bounds x="310" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_25_di" bpmnElement="Task_25">
+        <dc:Bounds x="310" y="300" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_28_di" bpmnElement="Task_28">
+        <dc:Bounds x="310" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_di" bpmnElement="Task_18">
+        <dc:Bounds x="500" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_9_di" bpmnElement="Task_9">
+        <dc:Bounds x="500" y="300" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_-2_di" bpmnElement="EndEvent_-2">
+        <dc:Bounds x="722" y="253" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
